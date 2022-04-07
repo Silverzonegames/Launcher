@@ -1,0 +1,10 @@
+title=GearSwitch <b><i>Beta <b><i>
+desc_url=https://raw.githubusercontent.com/Silverzonegames/silverzone-launcher/main/txt/SteampunkDesc
+banner=GearswitchCover.png
+icon=steampunk.png
+path=gearswitch/gearswitch/
+exe=GearSwitch.exe
+url=https://www.dropbox.com/s/2ga9bcpjeb7ex68/gearswitch.zip?dl=1
+version_url=https://raw.githubusercontent.com/Silverzonegames/silverzone-launcher/main/txt/SteampunkVersion
+zip=gearswitch
+
