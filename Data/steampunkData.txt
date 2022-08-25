@@ -1,6 +1,6 @@
-name=steampunk
-desc=Steampunk (Working title) is a 2D indie adventure game  
-download=https://github.com/Silverzonegames/Steampunk/releases/latest/download/steampunk.zip
-zip=steampunk.zip
-exe=steampunk\STEAMPUNK.zip
-version=0.6
+name=steampunk,
+desc=Steampunk (Working title) is a 2D indie adventure game,
+download=https://github.com/Silverzonegames/Steampunk/releases/latest/download/steampunk.zip,
+zip=steampunk.zip,
+exe=steampunk\STEAMPUNK.zip,
+version=0.6,
