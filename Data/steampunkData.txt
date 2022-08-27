@@ -1,4 +1,4 @@
-name=Steampubk Beta
+name=Steampunk Beta
 id=steampunk
 desc=Steampunk (Working title) is a 2D indie adventure game
 download=https://github.com/Silverzonegames/Steampunk/releases/latest/download/steampunk.zip
