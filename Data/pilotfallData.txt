@@ -1,0 +1,7 @@
+name= Pilotfall Alpha
+id= pilotfall
+desc=desc
+download=
+zip=pilotfall.zip
+exe=pilotfall\PILOTFALL.exe
+version=0.7
