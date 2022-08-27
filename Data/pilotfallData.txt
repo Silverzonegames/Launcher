@@ -1,6 +1,6 @@
 name= Pilotfall Alpha
 id= pilotfall
-desc=desc
+desc=Just a simple titanfall 2 inspired multiplayer game made in a week
 download=
 zip=pilotfall.zip
 exe=pilotfall\PILOTFALL.exe
