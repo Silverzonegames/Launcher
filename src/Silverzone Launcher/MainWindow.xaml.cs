@@ -31,18 +31,14 @@ namespace Silverzone_Launcher
     /// </summary>
     public partial class MainWindow : Window
     {
-
-        public string GamesListURL = "https://raw.githubusercontent.com/Silverzonegames/Launcher/main/Data/launcher/gamelist.txt";
-
-        List<GameData> gamesList = new List<GameData>();
-        
-
+        public static string GamesListURL = "https://raw.githubusercontent.com/Silverzonegames/Launcher/main/Data/launcher/gamelist.txt";
+        public List<GameData> gamesList = new List<GameData>();
         public int currentGame;
         public string downloadPath = Environment.CurrentDirectory + @"\Downloads\";
         public string gamePath = Environment.CurrentDirectory + @"\Games\";
 
 
-
+        #region System Startup
         public MainWindow()
         {
             
@@ -55,14 +51,18 @@ namespace Silverzone_Launcher
 
             InitTimer();
 
-            AutoUpdater.Start();
+#if !DEBUG
+            AutoUpdater.Start("https://raw.githubusercontent.com/Silverzonegames/Launcher/main/Data/launcher/updates.xml");
+#else
+            Console.WriteLine("Debug mode: auto update not started");
+#endif
         }
 
         private Timer timer1;
         public void InitTimer() {
             timer1 = new Timer();
             timer1.Elapsed += Tick;
-            timer1.Interval = 100; // in miliseconds
+            timer1.Interval = 100; // in milliseconds
             timer1.Start();
         }
 
@@ -79,17 +79,16 @@ namespace Silverzone_Launcher
             }
 
         }
+        #endregion
 
+        #region Update
 
         public void Start() {
             DownloadGamesList();
-
             Debug.WriteLine("Download data");
             DownloadData();
             Debug.WriteLine("Process Data");
             ProcessData();
-
-
         }
 
         public void Update()
@@ -117,96 +116,110 @@ namespace Silverzone_Launcher
         }
 
 
-        public void DownloadGamesList() {
+        #endregion
+
+        #region Data
+        public void DownloadGamesList()
+        {
             WebClient client = new WebClient();
             string downloadString = client.DownloadString(GamesListURL).TrimStart().TrimEnd();
 
             string[] lines = downloadString.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-            for (int i = 0; i < lines.Length; i++) {
+            for (int i = 0; i < lines.Length; i++)
+            {
                 gamesList.Add(new GameData(lines[i]));
             }
-            Debug.Write("GamesList "+ downloadString);
-            
+            Debug.Write("GamesList " + downloadString);
+
         }
-
-
-        public void DownloadData() {
+        public void DownloadData()
+        {
             /////////// Read GameData from url ////////////////////
-            for (int i = 0; i < gamesList.Count; i++) {
+            for (int i = 0; i < gamesList.Count; i++)
+            {
                 WebClient client = new WebClient();
                 string downloadString = client.DownloadString(gamesList[i].URL);
                 Debug.WriteLine("Downloaded data: " + downloadString);
                 gamesList[i].data = downloadString;
-                
+
             }
             Debug.WriteLine("Downloaded " + gamesList.Count + " data");
-          
+
         }
-        public void ProcessData() {
-            for (int i = 0; i < gamesList.Count; i++) {
+        public void ProcessData()
+        {
+            for (int i = 0; i < gamesList.Count; i++)
+            {
                 string _data = gamesList[i].data;
                 //split data by line
                 string[] lines = _data.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
                 //loop through lines
                 Debug.WriteLine("There are " + lines.Length + " variables");
-                for (int j = 0; j < lines.Length -1; j++) {
+                for (int j = 0; j < lines.Length - 1; j++)
+                {
 
-                        //get variables in line for example "name=steampunk"
-                    
-                        string var = lines[j].Split("=")[0].ToLower().TrimStart().TrimEnd();
-                        string value = lines[j].Split("=")[1];
+                    //get variables in line for example "name=steampunk"
 
-                        switch(var) {
-                            case "name":
-                                gamesList[i].name = value;
-                                break;
-                            case "desc":
-                                gamesList[i].desc = value;
-                                break;
-                            case "download":
-                                gamesList[i].download = value;
-                                break;
-                            case "version":
-                                gamesList[i].latestVersion = value;
-                                break;
-                            case "zip":
-                                gamesList[i].zip = value;
-                                break;
-                            case "exe":
-                                gamesList[i].exe = value;
-                                break;
-                            case "id":
-                                gamesList[i].id = value;
+                    string var = lines[j].Split("=")[0].ToLower().TrimStart().TrimEnd();
+                    string value = lines[j].Split("=")[1];
+
+                    switch (var)
+                    {
+                        case "name":
+                            gamesList[i].name = value;
                             break;
-                            
-                        }
-                        Debug.WriteLine("added " + var + ":" + value + " to " + gamesList[i].name);
-                    
+                        case "desc":
+                            gamesList[i].desc = value;
+                            break;
+                        case "download":
+                            gamesList[i].download = value;
+                            break;
+                        case "version":
+                            gamesList[i].latestVersion = value;
+                            break;
+                        case "zip":
+                            gamesList[i].zip = value;
+                            break;
+                        case "exe":
+                            gamesList[i].exe = value;
+                            break;
+                        case "id":
+                            gamesList[i].id = value;
+                            break;
+
+                    }
+                    Debug.WriteLine("added " + var + ":" + value + " to " + gamesList[i].name);
+
                 }
 
                 listBox_gameslist.Items.Add(gamesList[i].name);
 
             }
-            
+
         }
+        #endregion
 
 
+        #region Game Management
         WebClient webClient = new WebClient();
-        public void DownloadGame(int index) {
+        public void DownloadGame(int index)
+        {
 
             //make download dir if it doesnt exist
             if (!Directory.Exists(downloadPath))
                 Directory.CreateDirectory(downloadPath);
 
             //remove previous download
-            if (File.Exists(downloadPath + gamesList[index].zip)) {
+            if (File.Exists(downloadPath + gamesList[index].zip))
+            {
                 File.Delete(downloadPath + gamesList[index].zip);
             }
 
 
             webClient.DownloadProgressChanged += (s, e) => {
                 progbar_download.Value = e.ProgressPercentage;
-                if(e.ProgressPercentage >= 100) {
+                if (e.ProgressPercentage >= 100)
+                {
                     progbar_download.Visibility = Visibility.Hidden;
                     Debug.WriteLine("Download COmplete");
                     InstallGame(index);
@@ -219,13 +232,14 @@ namespace Silverzone_Launcher
 
 
 
-            
+
         }
 
         public void InstallGame(int index)
         {
             //create game folder if it doenst exist
-            if (!Directory.Exists(gamePath)) {
+            if (!Directory.Exists(gamePath))
+            {
                 Directory.CreateDirectory(gamePath);
             }
 
@@ -239,33 +253,44 @@ namespace Silverzone_Launcher
 
         }
 
-        public void DeleteGame(int index) {
-            if (Directory.Exists(gamePath + gamesList[index].id)) {
+        public void DeleteGame(int index)
+        {
+            if (Directory.Exists(gamePath + gamesList[index].id))
+            {
                 Directory.Delete(gamePath + gamesList[index].id);
                 btn_Play.Content = "Download";
             }
         }
 
-        public void PlayGame(int index) {
+        public void PlayGame(int index)
+        {
             Process.Start(gamePath + gamesList[index].id + "\\" + gamesList[index].exe);
         }
 
-        private void btnPlay_Click(object sender, RoutedEventArgs e) {
+        #endregion
+
+        #region Window Elements
+        private void btnPlay_Click(object sender, RoutedEventArgs e)
+        {
 
 
 
-            if (gamesList[currentGame].version != gamesList[currentGame].latestVersion && !string.IsNullOrEmpty(gamesList[currentGame].version)) {
+            if (gamesList[currentGame].version != gamesList[currentGame].latestVersion && !string.IsNullOrEmpty(gamesList[currentGame].version))
+            {
                 DownloadGame(currentGame);
             }
-            else if (Directory.Exists(gamePath + gamesList[currentGame].id)) {
+            else if (Directory.Exists(gamePath + gamesList[currentGame].id))
+            {
                 PlayGame(currentGame);
             }
-            else {
+            else
+            {
                 DownloadGame(currentGame);
             }
         }
 
-        private void listBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+        private void listBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
             currentGame = listBox_gameslist.SelectedIndex;
         }
 
@@ -276,5 +301,6 @@ namespace Silverzone_Launcher
             FlowDocument doc = renderer.Transform(htmlSrc);
             return doc;
         }
+        #endregion
     }
 }
