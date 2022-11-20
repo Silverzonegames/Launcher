@@ -1,1 +1,1 @@
-# silverzone-launcher
+# Silverzone game launcher
