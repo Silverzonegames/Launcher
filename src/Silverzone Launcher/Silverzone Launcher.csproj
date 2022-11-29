@@ -9,11 +9,11 @@
     <Authors>$(AssemblyName)</Authors>
 	<Company>Silverzone</Company>
 	<SignAssembly>False</SignAssembly>
-	<AssemblyVersion>1.0.0.0</AssemblyVersion>
-	<FileVersion>1.0.0.2</FileVersion>
+	<AssemblyVersion>1.0.1.0</AssemblyVersion>
+	<FileVersion>1.0.0.3</FileVersion>
 	<UseWindowsForms>True</UseWindowsForms>
 	  <PublishSingleFile>false</PublishSingleFile>
-	  <SelfContained>false</SelfContained>
+	  <SelfContained>true</SelfContained>
 	  <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
 
