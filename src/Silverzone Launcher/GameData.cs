@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Silverzone_Launcher {
-    internal class GameData {
+    public class GameData {
         //url to download data
         public string URL;
         //data string downloaded from url
