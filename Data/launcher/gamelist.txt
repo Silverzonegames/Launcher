@@ -1,2 +1,3 @@
 https://raw.githubusercontent.com/Silverzonegames/Launcher/main/Data/games/steampunkData.txt
 https://raw.githubusercontent.com/Silverzonegames/Launcher/main/Data/games/pilotfallData.txt
+https://raw.githubusercontent.com/Silverzonegames/Launcher/main/Data/games/testGame.txt
