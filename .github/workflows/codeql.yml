@@ -23,7 +23,7 @@ on:
 jobs:
   analyze:
     name: Analyze
-    runs-on: windows
+    runs-on: windows-latest
     # ubuntu-latest
     permissions:
       actions: read
