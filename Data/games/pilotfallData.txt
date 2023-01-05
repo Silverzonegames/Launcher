@@ -1,5 +1,5 @@
 name= Pilotfall Alpha
-id= pilotfall
+id=pilotfall
 desc=Just a simple titanfall 2 inspired multiplayer game made in a week\Hello\Multiline comments?
 download=https://github.com/Silverzonegames/Pilotfall/releases/latest/download/pilotfall.zip
 zip=pilotfall.zip
