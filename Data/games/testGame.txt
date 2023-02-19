@@ -1,0 +1,7 @@
+name=Test Game (Very good)
+id=ebb why no work
+desc=Who?
+download=https://github.com/Silverzonegames/Pilotfall/releases/latest/download/pilotfall.zip
+zip=pilotfall.zip
+exe=Pilotfall.exe
+version=1
