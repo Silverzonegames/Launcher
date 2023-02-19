@@ -51,11 +51,7 @@ namespace Silverzone_Launcher
 
             InitTimer();
 
-#if !DEBUG
             AutoUpdater.Start("https://raw.githubusercontent.com/Silverzonegames/Launcher/main/Data/launcher/updates.xml");
-#else
-            Console.WriteLine("Debug mode: auto update not started");
-#endif
         }
 
         private Timer timer1;
