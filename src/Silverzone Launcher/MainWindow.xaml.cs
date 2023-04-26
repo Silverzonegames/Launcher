@@ -21,8 +21,10 @@ using System.IO.Compression;
 using System.Timers;
 using MdXaml;
 using AutoUpdaterDotNET;
-
-
+using Silverzone.CommonLib.Ex;
+using Silverzone.CommonLib;
+using Silverzone.CommonLib.Auth;
+using Silverzone.CommonLib.Log;
 
 namespace Silverzone_Launcher
 {
@@ -31,12 +33,12 @@ namespace Silverzone_Launcher
     /// </summary>
     public partial class MainWindow : Window
     {
+        internal static readonly CommonLib clib = new CommonLib();
         public static string GamesListURL = "https://raw.githubusercontent.com/Silverzonegames/Launcher/main/Data/launcher/gamelist.txt";
         public List<GameData> gamesList = new List<GameData>();
         public int currentGame;
         public string downloadPath = Environment.CurrentDirectory + @"\Downloads\";
         public string gamePath = Environment.CurrentDirectory + @"\Games\";
-
 
         #region System Startup
         public MainWindow()
@@ -50,6 +52,8 @@ namespace Silverzone_Launcher
 
 
             InitTimer();
+
+            Logger.LoggerInit();
 
             AutoUpdater.Start("https://raw.githubusercontent.com/Silverzonegames/Launcher/main/Data/launcher/updates.xml");
         }
@@ -139,7 +143,9 @@ namespace Silverzone_Launcher
                 gamesList[i].data = downloadString;
 
             }
+            string lstring = string.Join("Downloaded ", gamesList.Count, " data");
             Debug.WriteLine("Downloaded " + gamesList.Count + " data");
+            Logger.LogWrite(lstring);
 
         }
         public void ProcessData()
@@ -151,6 +157,8 @@ namespace Silverzone_Launcher
                 string[] lines = _data.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
                 //loop through lines
                 Debug.WriteLine("There are " + lines.Length + " variables");
+                string lstring = string.Join("There are ", lines.Length, " variables");
+                Logger.LogWrite(lstring);
                 for (int j = 0; j < lines.Length - 1; j++)
                 {
 
@@ -185,6 +193,8 @@ namespace Silverzone_Launcher
 
                     }
                     Debug.WriteLine("added " + var + ":" + value + " to " + gamesList[i].name);
+                    string alstring = string.Join("added ", var, ":", value, " to ", gamesList[i].name);
+                    Logger.LogWrite(alstring);
 
                 }
 
@@ -194,7 +204,6 @@ namespace Silverzone_Launcher
 
         }
         #endregion
-
 
         #region Game Management
         WebClient webClient = new WebClient();

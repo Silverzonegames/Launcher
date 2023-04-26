@@ -43,6 +43,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\ai-ml-platform\engine\Common State\Common Library.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Resources\Images\silverone_white_trimmed.png" />
   </ItemGroup>
 
