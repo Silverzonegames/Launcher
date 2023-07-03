@@ -1,2 +1,3 @@
 * @silverzonegames/admins
 *.md @silverzonegames/release-admins @silverzonegames/admins
+Data/**/* @silverzonegames/release-admins @silverzonegames/admins @silverzonegames/project-team
