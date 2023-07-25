@@ -17,14 +17,14 @@
             <RowDefinition Height="90.008"/>
             <RowDefinition Height="61*"/>
         </Grid.RowDefinitions>
-        <Button x:Name="btn_Play" Grid.Column="1" Content="Play" Margin="10,40,0,0" Foreground="White" Click="btnPlay_Click" Background="#FF0088DE" VerticalAlignment="Top" HorizontalAlignment="Left" MinWidth="140" MinHeight="40" MaxWidth="140" MaxHeight="40" Grid.Row="1" RenderTransformOrigin="0.505,1.251">
+        <Button Name="btn_Play" Click="btn_Play_Click" Grid.Column="1" Content="Play" Margin="10,40,0,0" Foreground="White" Background="#FF0088DE" VerticalAlignment="Top" HorizontalAlignment="Left" MinWidth="140" MinHeight="40" MaxWidth="140" MaxHeight="40" Grid.Row="1" RenderTransformOrigin="0.505,1.251">
             <Button.BorderBrush>
                 <SolidColorBrush Color="#FF0088DE" Opacity="1"/>
             </Button.BorderBrush>
         </Button>
         <Label x:Name="lbl_playButton" Grid.Column="1" Content="Game Title&#xA;" Margin="10,0,453,48" FontSize="18" Foreground="White" Grid.RowSpan="2" Height="42" VerticalAlignment="Bottom"/>
         <Label x:Name="lbl_Version" Grid.Column="1" Content="Ver" Margin="0,0,400,56" Height="26" VerticalAlignment="Bottom" RenderTransformOrigin="0.088,0.577" Foreground="White" HorizontalAlignment="Right" Width="38" Grid.Row="1"/>
-        <ListBox x:Name="listBox_gameslist" d:ItemsSource="{d:SampleData ItemCount=5}" SelectionChanged="listBox_SelectionChanged" HorizontalAlignment="Center" Width="188" Background="#FF24282F" Foreground="White" FontSize="24" Grid.RowSpan="3">
+        <ListBox x:Name="listBox_gameslist" d:ItemsSource="{d:SampleData ItemCount=5}" SelectionChanged="listBox_gameslist_SelectionChanged" HorizontalAlignment="Center" Width="188" Background="#FF24282F" Foreground="White" FontSize="24" Grid.RowSpan="3">
             <ListBox.BorderBrush>
                 <SolidColorBrush Color="#FFABADB3" Opacity="0"/>
             </ListBox.BorderBrush>
@@ -39,7 +39,5 @@
                 </Paragraph>
             </FlowDocument>
         </RichTextBox>
-
-
     </Grid>
 </Window>

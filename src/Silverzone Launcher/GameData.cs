@@ -9,19 +9,19 @@ namespace Silverzone_Launcher {
         //url to download data
         public string URL;
         //data string downloaded from url
-        public string data;
+        public string? data;
 
         //processed data
-        public string name;
-        public string id;
-        public string desc;
+        public string? name;
+        public string? id;
+        public string? desc;
 
-        public string download;
-        public string zip;
-        public string exe;
+        public string? download;
+        public string? zip;
+        public string? exe;
 
-        public string latestVersion;
-        public string version;
+        public string? latestVersion;
+        public string? version;
 
 
         public GameData(string _url) { 

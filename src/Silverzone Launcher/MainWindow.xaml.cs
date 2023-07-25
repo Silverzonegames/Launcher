@@ -23,8 +23,9 @@ using MdXaml;
 using AutoUpdaterDotNET;
 using Silverzone.CommonLib.Ex;
 using Silverzone.CommonLib;
-using Silverzone.CommonLib.Auth;
+using Silverzone.CommonLib.API;
 using Silverzone.CommonLib.Log;
+using System.Threading;
 
 namespace Silverzone_Launcher
 {
@@ -33,49 +34,60 @@ namespace Silverzone_Launcher
     /// </summary>
     public partial class MainWindow : Window
     {
-        internal static readonly CommonLib clib = new CommonLib();
-        public static string GamesListURL = "https://raw.githubusercontent.com/Silverzonegames/Launcher/main/Data/launcher/gamelist.txt";
-        public List<GameData> gamesList = new List<GameData>();
-        public int currentGame;
-        public string downloadPath = Environment.CurrentDirectory + @"\Downloads\";
-        public string gamePath = Environment.CurrentDirectory + @"\Games\";
+        internal static readonly CommonLib clib = new();
+        internal static readonly WebClient client = new();
+        internal readonly StateManager sm = new();
+
+        [Flags]
+        public enum P_Flags : short
+        {
+            NoClib = 0,
+            Clib = 1,
+            NoWClient = 2,
+            WClient = 4,
+            NoLog = 8,
+            Log = 16,
+        }
+
+        private readonly short flags;
 
         #region System Startup
         public MainWindow()
         {
-            
-
+            Logger.LoggerInit();
+            if (timer1 == null) throw new Exceptions.ApplicationComponentException();
             InitializeComponent();
 
 
-            Start();
+            //Start();
 
+            //StateManager sm = new();
+            //if (sm == null) throw new Exception(nameof(sm));
+            sm.DownloadGamesList();
+            sm.DownloadData();
+            sm.ProcessData();
 
             InitTimer();
-
-            Logger.LoggerInit();
-
             AutoUpdater.Start("https://raw.githubusercontent.com/Silverzonegames/Launcher/main/Data/launcher/updates.xml");
         }
 
-        private Timer timer1;
+        private readonly System.Timers.Timer timer1 = new();
         public void InitTimer() {
-            timer1 = new Timer();
             timer1.Elapsed += Tick;
             timer1.Interval = 100; // in milliseconds
             timer1.Start();
         }
 
-        private void Tick(object sender, EventArgs e) {
-
+        private void Tick(object? sender, EventArgs e) {
+            if (sender == null) return;
             try {
                 Dispatcher.Invoke(() =>
                 {
                     Update();
                 });
             }
-            catch (Exception) {
-               
+            catch (Exception ex) {
+               Logger.LogException(ex, Logger.Severity.Error);
             }
 
         }
@@ -83,17 +95,13 @@ namespace Silverzone_Launcher
 
         #region Update
 
-        public void Start() {
-            DownloadGamesList();
-            Debug.WriteLine("Download data");
-            DownloadData();
-            Debug.WriteLine("Process Data");
-            ProcessData();
+        internal static void Start() {
+            
         }
 
         public void Update()
         {
-            if (Directory.Exists(gamePath + gamesList[currentGame].id)) {
+            if (Directory.Exists(sm.gamePath + sm.gamesList[sm.currentGame].id)) {
                 btn_Play.Content = "Play";
                 btn_Play.Background = new SolidColorBrush(Colors.Green);
             }
@@ -101,211 +109,61 @@ namespace Silverzone_Launcher
                 btn_Play.Content = "Download";
                 btn_Play.Background = new SolidColorBrush(Colors.Blue);
             }
-            if (gamesList[currentGame].version != gamesList[currentGame].latestVersion && !string.IsNullOrEmpty( gamesList[currentGame].version)) {
-                btn_Play.Content = "Update to" + gamesList[currentGame].latestVersion;
+            if (sm.gamesList[sm.currentGame].version != sm.gamesList[sm.currentGame].latestVersion && !string.IsNullOrEmpty( sm.gamesList[sm.currentGame].version)) {
+                btn_Play.Content = "Update to" + sm.gamesList[sm.currentGame].latestVersion;
                 btn_Play.Background = new SolidColorBrush(Colors.Blue);
             }
 
-            lbl_playButton.Content = gamesList[currentGame].name;
-            lbl_Version.Content = "v" + gamesList[currentGame].version;
-            lbl_desc.Content = gamesList[currentGame].desc.Replace(@"\", "\n");
+            lbl_playButton.Content = sm.gamesList[sm.currentGame].name;
+            lbl_Version.Content = "v" + sm.gamesList[sm.currentGame].version;
+            var desc = sm.gamesList[sm.currentGame].desc;
+            if (desc == null) return;
+            lbl_desc.Content = desc.Replace(@"\", "\n");
 
-            if (string.IsNullOrEmpty(gamesList[currentGame].version) && File.Exists(gamePath + gamesList[currentGame].id + "\\version.txt")) {         
-                gamesList[currentGame].version = File.ReadAllText(gamePath + gamesList[currentGame].id + "\\version.txt").TrimEnd().TrimStart();
+            if (string.IsNullOrEmpty(sm.gamesList[sm.currentGame].version) && File.Exists(sm.gamePath + sm.gamesList[sm.currentGame].id + "\\version.txt")) {         
+                sm.gamesList[sm.currentGame].version = File.ReadAllText(sm.gamePath + sm.gamesList[sm.currentGame].id + "\\version.txt").TrimEnd().TrimStart();
             }
         }
 
 
         #endregion
 
-        #region Data
-        public void DownloadGamesList()
+        protected void btn_Play_Click(object sender, RoutedEventArgs e)
         {
-            WebClient client = new WebClient();
-            string downloadString = client.DownloadString(GamesListURL).TrimStart().TrimEnd();
-
-            string[] lines = downloadString.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-            for (int i = 0; i < lines.Length; i++)
+            if (sm.gamesList[sm.currentGame].version != sm.gamesList[sm.currentGame].latestVersion && !string.IsNullOrEmpty(sm.gamesList[sm.currentGame].version))
             {
-                gamesList.Add(new GameData(lines[i]));
+                GameManager.DownloadGame(sm.currentGame);
             }
-            Debug.Write("GamesList " + downloadString);
-
-        }
-        public void DownloadData()
-        {
-            /////////// Read GameData from url ////////////////////
-            for (int i = 0; i < gamesList.Count; i++)
+            else if (Directory.Exists(sm.gamePath + sm.gamesList[sm.currentGame].id))
             {
-                WebClient client = new WebClient();
-                string downloadString = client.DownloadString(gamesList[i].URL);
-                Debug.WriteLine("Downloaded data: " + downloadString);
-                gamesList[i].data = downloadString;
-
-            }
-            string lstring = string.Join("Downloaded ", gamesList.Count, " data");
-            Debug.WriteLine("Downloaded " + gamesList.Count + " data");
-            Logger.LogWrite(lstring);
-
-        }
-        public void ProcessData()
-        {
-            for (int i = 0; i < gamesList.Count; i++)
-            {
-                string _data = gamesList[i].data;
-                //split data by line
-                string[] lines = _data.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-                //loop through lines
-                Debug.WriteLine("There are " + lines.Length + " variables");
-                string lstring = string.Join("There are ", lines.Length, " variables");
-                Logger.LogWrite(lstring);
-                for (int j = 0; j < lines.Length - 1; j++)
-                {
-
-                    //get variables in line for example "name=steampunk"
-
-                    string var = lines[j].Split("=")[0].ToLower().TrimStart().TrimEnd();
-                    string value = lines[j].Split("=")[1];
-
-                    switch (var)
-                    {
-                        case "name":
-                            gamesList[i].name = value;
-                            break;
-                        case "desc":
-                            gamesList[i].desc = value;
-                            break;
-                        case "download":
-                            gamesList[i].download = value;
-                            break;
-                        case "version":
-                            gamesList[i].latestVersion = value;
-                            break;
-                        case "zip":
-                            gamesList[i].zip = value;
-                            break;
-                        case "exe":
-                            gamesList[i].exe = value;
-                            break;
-                        case "id":
-                            gamesList[i].id = value;
-                            break;
-
-                    }
-                    Debug.WriteLine("added " + var + ":" + value + " to " + gamesList[i].name);
-                    string alstring = string.Join("added ", var, ":", value, " to ", gamesList[i].name);
-                    Logger.LogWrite(alstring);
-
-                }
-
-                listBox_gameslist.Items.Add(gamesList[i].name);
-
-            }
-
-        }
-        #endregion
-
-        #region Game Management
-        WebClient webClient = new WebClient();
-        public void DownloadGame(int index)
-        {
-
-            //make download dir if it doesnt exist
-            if (!Directory.Exists(downloadPath))
-                Directory.CreateDirectory(downloadPath);
-
-            //remove previous download
-            if (File.Exists(downloadPath + gamesList[index].zip))
-            {
-                File.Delete(downloadPath + gamesList[index].zip);
-            }
-
-
-            webClient.DownloadProgressChanged += (s, e) => {
-                progbar_download.Value = e.ProgressPercentage;
-                if (e.ProgressPercentage >= 100)
-                {
-                    progbar_download.Visibility = Visibility.Hidden;
-                    Debug.WriteLine("Download COmplete");
-                    InstallGame(index);
-                }
-            };
-
-            progbar_download.Visibility = Visibility.Visible;
-
-            webClient.DownloadFileAsync(new Uri(gamesList[index].download), downloadPath + gamesList[index].zip);
-
-
-
-
-        }
-
-        public void InstallGame(int index)
-        {
-            //create game folder if it doenst exist
-            if (!Directory.Exists(gamePath))
-            {
-                Directory.CreateDirectory(gamePath);
-            }
-
-            //extract zip
-            ZipFile.ExtractToDirectory(downloadPath + gamesList[index].zip, gamePath + gamesList[index].id);
-
-            //delete download
-            File.Delete(gamePath + gamesList[index].zip);
-
-            btn_Play.Content = "Play";
-
-        }
-
-        public void DeleteGame(int index)
-        {
-            if (Directory.Exists(gamePath + gamesList[index].id))
-            {
-                Directory.Delete(gamePath + gamesList[index].id);
-                btn_Play.Content = "Download";
-            }
-        }
-
-        public void PlayGame(int index)
-        {
-            Process.Start(gamePath + gamesList[index].id + "\\" + gamesList[index].exe);
-        }
-
-        #endregion
-
-        #region Window Elements
-        private void btnPlay_Click(object sender, RoutedEventArgs e)
-        {
-
-
-
-            if (gamesList[currentGame].version != gamesList[currentGame].latestVersion && !string.IsNullOrEmpty(gamesList[currentGame].version))
-            {
-                DownloadGame(currentGame);
-            }
-            else if (Directory.Exists(gamePath + gamesList[currentGame].id))
-            {
-                PlayGame(currentGame);
+                GameManager.PlayGame(sm.currentGame);
             }
             else
             {
-                DownloadGame(currentGame);
+                GameManager.DownloadGame(sm.currentGame);
             }
         }
 
-        private void listBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        protected void listBox_gameslist_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            currentGame = listBox_gameslist.SelectedIndex;
+            sm.currentGame = listBox_gameslist.SelectedIndex;
         }
 
-        private FlowDocument Description(string _contentpath)
+        private static FlowDocument Description(string _contentpath)
         {
-            Markdown renderer = new Markdown();
+            Markdown renderer = new();
             string htmlSrc = System.IO.File.ReadAllText(_contentpath + "README.md");
             FlowDocument doc = renderer.Transform(htmlSrc);
             return doc;
         }
-        #endregion
+
+
+        public static void GamelistInsert(object? item, MainWindow window)
+        {
+            if (item == null) throw new Exception("ITEM is null");
+            var win = ((MainWindow)window).listBox_gameslist;
+            if (win == null) throw new Exception("Window is NULL, help");
+            win.Items.Add(item);
+        }
     }
 }
